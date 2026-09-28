@@ -1,0 +1,9 @@
+CREATE DATABASE IF NOT EXISTS arena_db;
+USE arena_db;
+
+CREATE TABLE IF NOT EXISTS users (
+    uid VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    elo_rating INT DEFAULT 1200,
+    is_online BOOLEAN DEFAULT FALSE
+);

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TicTacToe</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/png" href="/static/favicon.ico">
+</head>
+<body>
+
+<header class="topbar">
+    <span class="logo">tictactoe<span>.</span>com</span>
+    <div class="topbar-right">
+        <span class="topbar-badge">Player #<span id="myid"></span></span>
+        <span class="topbar-badge green" id="my-elo-badge" style="display:none;"></span>
+    </div>
+</header>
+
+<div class="app">
+    <aside class="sidebar">
+        <div class="sidebar-tabs">
+            <button class="active" id="tab-players" onclick="player_zone()">Players</button>
+            <button id="tab-lb" onclick="leaderboard()">Leaderboard</button>
+        </div>
+        <div class="sidebar-body">
+            <div class="self-row">
+                <div class="avatar" id="self-avatar"></div>
+                <div class="self-info">
+                    <div class="self-name" id="self_label"></div>
+                    <div class="self-elo" id="self-elo-row"></div>
+                </div>
+            </div>
+            <div id="player_zone">
+                <ul id="players"></ul>
+            </div>
+            <ul id="Leaderboard"></ul>
+        </div>
+    </aside>
+
+    <div class="main">
+        <div id="lobby">
+            <div class="chat-messages">
+                <ul id="messages"></ul>
+            </div>
+            <div class="chat-input-row">
+                <form onsubmit="sendMessage(event)" style="display:flex;gap:8px;flex:1;">
+                    <input type="text" id="messageText" autocomplete="off" class="chatinput" placeholder="Send a message…"/>
+                    <button type="submit" class="send-btn">Send</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="game-view" style="display:none;">
+            <span class="room-label">Room <span id="room_id"></span></span>
+
+            <div class="player-strip" id="card-accepter">
+                <div class="strip-turn"></div>
+                <div id="avatar-accepter" style="flex-shrink:0;"></div> 
+                <div class="strip-info">
+                    <div class="strip-name" id="name-accepter">Player —</div>
+                </div>
+                <span class="strip-mark mark-o">O</span>
+            </div>
+
+            <p id="turn-indicator"></p>
+
+            <div id="board">
+                <button class="cell" onclick="move(0)"></button>
+                <button class="cell" onclick="move(1)"></button>
+                <button class="cell" onclick="move(2)"></button>
+                <button class="cell" onclick="move(3)"></button>
+                <button class="cell" onclick="move(4)"></button>
+                <button class="cell" onclick="move(5)"></button>
+                <button class="cell" onclick="move(6)"></button>
+                <button class="cell" onclick="move(7)"></button>
+                <button class="cell" onclick="move(8)"></button>
+            </div>
+
+            <div class="player-strip active" id="card-challenger">
+                <div class="strip-turn"></div>
+                <div id="avatar-challenger" style="flex-shrink:0;"></div>
+                <div class="strip-info">
+                    <div class="strip-name" id="name-challenger">Player —</div>
+                </div>
+                <span class="strip-mark mark-x">X</span>
+            </div>
+            <button class="forfitbtn" id="forfitbtn" onclick="forfit()" style="display:none;">Forfeit</button>
+            <button class="lobbybtn" id="lobbybtn" onclick="lobby()" style="display:none;">Back to lobby</button>
+        </div>
+    </div>
+</div>  
+
+<div id="customConfirm" class="confirm">
+    <p id="challengeText"></p>
+    <div class="confirm-btns">
+        <button id="yesBtn">Accept</button>
+        <button id="noBtn">Decline</button>
+    </div>
+</div>
+    
+    <script src="/static/script.js"></script>
+</body>
+</html>

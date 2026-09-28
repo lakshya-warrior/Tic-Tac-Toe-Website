@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Identity Verification - TicTacToe</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #262522; /* Chess.com main background */
+      color: #bab9b8;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 20px;
+      letter-spacing: 0.01em;
+    }
+    .logo span { color: #81b64c; }
+
+    .container {
+      background: #1a1917;
+      padding: 40px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid #3d3b39;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+      width: 400px;
+    }
+
+    h2 {
+      color: white;
+      font-size: 18px;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .video-wrapper {
+      position: relative;
+      background: #000;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 2px solid #312e2b;
+      margin-bottom: 20px;
+      line-height: 0;
+    }
+
+    video {
+      width: 100%;
+      height: auto;
+      transform: scaleX(-1); /* Mirror effect for better UX */
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 4px;
+      background: #81b64c; /* Chess.com primary green */
+      color: #1a2e0a;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+      box-shadow: 0 4px 0 #5b8136; /* Subtle button depth */
+    }
+
+    .login-btn:hover {
+      background: #8fc256;
+    }
+
+    .login-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #5b8136;
+    }
+
+    .status {
+      margin-top: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      min-height: 20px;
+    }
+
+    .status.error { color: #c55a4a; }
+    .status.success { color: #81b64c; }
+
+    /* Scanning animation overlay */
+    .scanner-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: rgba(129, 182, 76, 0.5);
+      box-shadow: 0 0 10px #81b64c;
+      display: none;
+      animation: scan 2s infinite linear;
+    }
+
+    @keyframes scan {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+  </style>
+    <link rel="icon" type="image/png" href="/static/favicon.ico">
+</head>
+<body>
+  <div class="logo">tictactoe<span>.</span>com</div>
+
+  <div class="container">
+    <h2>Identity Verification</h2>
+    
+    <div class="video-wrapper">
+      <video id="video" autoplay muted playsinline></video>
+      <div id="scanner" class="scanner-line"></div>
+    </div>
+
+    <button class="login-btn" id="loginBtn" onclick="capture()">VERIFY IDENTITY</button>
+    
+    <div class="status" id="status">Position your face in the frame</div>
+  </div>
+
+<script>
+  const video = document.getElementById("video");
+  const statusText = document.getElementById("status");
+  const scanner = document.getElementById("scanner");
+  const loginBtn = document.getElementById("loginBtn");
+
+  // Initialize camera
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+    .then(stream => {
+        video.srcObject = stream;
+    })
+    .catch(err => {
+        statusText.innerText = "❌ Camera access denied";
+        statusText.classList.add("error");
+    });
+
+  function capture() {
+    // UI Updates
+    statusText.innerText = "Analyzing facial features...";
+    statusText.classList.remove("error", "success");
+    scanner.style.display = "block";
+    loginBtn.disabled = true;
+    loginBtn.style.opacity = "0.7";
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0);
+
+    canvas.toBlob((blob) => {
+      const formData = new FormData();
+      formData.append("file", blob, "capture.png");
+
+      // Use the auth route we built in router.py
+      fetch("/auth/login", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Match failed");
+        return res.json();
+      })
+      .then(data => {
+        scanner.style.display = "none";
+        statusText.innerText = `✅ Identity Confirmed! Welcome, ${data.uid}`;
+        statusText.classList.add("success");
+          
+        // Redirect to lobby with the UID
+        setTimeout(() => {
+            window.location.href = `/lobby?uid=${data.uid}`;
+        }, 1200);
+      })
+      .catch(err => {
+        scanner.style.display = "none";
+        loginBtn.disabled = false;
+        loginBtn.style.opacity = "1";
+        statusText.innerText = "❌ Face not recognized. Try again.";
+        statusText.classList.add("error");
+      });
+    }, "image/png");
+  }
+</script>
+
+</body>
+</html>
