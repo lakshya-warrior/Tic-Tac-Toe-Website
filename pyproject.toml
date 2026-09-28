@@ -1,8 +1,9 @@
 [project]
-name = "project"
+name = "tictactoe-arena"
 version = "0.1.0"
-description = "Add your description here"
+description = "Real-time multiplayer Tic-Tac-Toe web application featuring biometric facial recognition authentication and dual-database architecture."
 readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.13"
 dependencies = [
     "cryptography>=46.0.7",
