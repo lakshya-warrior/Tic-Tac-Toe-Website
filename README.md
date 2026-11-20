@@ -57,9 +57,8 @@ A real-time, competitive multiplayer Tic-Tac-Toe web platform featuring biometri
 │   ├── database.py              # MySQL connection pool & MongoDB client
 │   ├── main.py                  # FastAPI application & WebSocket ConnectionManager
 │   └── sql_functions.py         # Database query helpers & ELO calculation
-├── frontend/
+├── docs/
 │   └── index.html               # Facial login & camera capture UI
-├── static/
 │   ├── style.css                # Dark-mode gaming UI styling
 │   ├── script.js                # Game engine, WebSocket events & canvas rendering
 │   └── favicon.ico

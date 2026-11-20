@@ -292,12 +292,12 @@ app.add_middleware(
 
 # TODO: Mount the authentication sub-module to the main application 
 # tree using a dedicated URL namespace.
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/docs", StaticFiles(directory="docs"), name="docs")
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 
 @app.get("/")
 async def get_index():
-    return FileResponse("frontend/index.html")
+    return FileResponse("docs/index.html")
     # return {"status": "online"}
 
 
