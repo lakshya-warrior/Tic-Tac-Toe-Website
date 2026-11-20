@@ -298,12 +298,23 @@ app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 @app.get("/")
 async def get_index():
     return FileResponse("docs/index.html")
-    # return {"status": "online"}
 
+@app.get("/style.css")
+async def get_style():
+    return FileResponse("docs/style.css")
+
+@app.get("/script.js")
+async def get_script():
+    return FileResponse("docs/script.js")
+
+@app.get("/favicon.ico")
+async def get_favicon():
+    return FileResponse("docs/favicon.ico")
 
 @app.get("/lobby")
 async def get_lobby():
     return FileResponse("websocketpage.html")
+
 
 
 @app.websocket("/ws/{client_id}")

@@ -91,6 +91,36 @@ def update_user_status(uid: str, is_online: bool):
     update_cursor.close()
     database.close()
 
+
+def ensure_user_online(uid: str, default_name: str = None):
+    """
+    Ensures the user with roll number/uid exists in MySQL and is marked online.
+    If the user doesn't exist, automatically registers them.
+    """
+    if uid is None:
+        return None
+    database = mysql_pool.get_connection()
+    cursor = database.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT name FROM users WHERE uid = %s", (str(uid),))
+        user = cursor.fetchone()
+        if user:
+            cursor.execute("UPDATE users SET is_online = TRUE WHERE uid = %s", (str(uid),))
+            database.commit()
+            return user.get("name") or default_name or f"Player #{uid}"
+        else:
+            name = default_name or f"Player #{uid}"
+            cursor.execute(
+                "INSERT INTO users (uid, name, elo_rating, is_online) VALUES (%s, %s, 1200, TRUE) "
+                "ON DUPLICATE KEY UPDATE is_online = TRUE",
+                (str(uid), name)
+            )
+            database.commit()
+            return name
+    finally:
+        cursor.close()
+        database.close()
+
  
 
 

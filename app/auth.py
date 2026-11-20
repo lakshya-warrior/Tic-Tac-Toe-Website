@@ -1,11 +1,39 @@
+from typing import Optional
 from fastapi import APIRouter, File, HTTPException, UploadFile
-from app.database import get_all_faces, update_user_status
+from pydantic import BaseModel
+from app.database import ensure_user_online, get_all_faces, update_user_status
 
 from utils.facial_recognition_module import build_encodings_cache, find_closest_match
 
 router = APIRouter()
 
 ENCODING_CACHE = None
+
+
+class RollLoginRequest(BaseModel):
+    roll_number: str
+    name: Optional[str] = None
+
+
+@router.post("/login-roll")
+async def login_with_roll(request: RollLoginRequest):
+    clean_uid = request.roll_number.strip()
+    if not clean_uid:
+        raise HTTPException(status_code=400, detail="Roll number cannot be empty")
+    
+    if not clean_uid.isdigit():
+        raise HTTPException(
+            status_code=400,
+            detail="Roll number must be numeric (e.g., 2025101001 or 1001)"
+        )
+
+    user_name = ensure_user_online(clean_uid, request.name)
+    return {
+        "status": "success",
+        "uid": clean_uid,
+        "name": user_name
+    }
+
 
 
 @router.post("/login")

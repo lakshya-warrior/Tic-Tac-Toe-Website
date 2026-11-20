@@ -66,7 +66,7 @@ def harvest_data():
             image_url = f"{url}/images/pfp.jpg"
 
             try:
-                response = requests.get(image_url, timeout=5)
+                response = requests.get(image_url, timeout=5, verify=False)
                 response.raise_for_status() # checks status code and raises error if request failed
 
                 image_binary = response.content

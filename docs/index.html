@@ -19,8 +19,9 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
+      padding: 20px;
     }
 
     .logo {
@@ -34,18 +35,19 @@
 
     .container {
       background: #1a1917;
-      padding: 40px;
+      padding: 30px 40px;
       border-radius: 8px;
       text-align: center;
       border: 1px solid #3d3b39;
       box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-      width: 400px;
+      width: 420px;
+      max-width: 100%;
     }
 
     h2 {
       color: white;
       font-size: 18px;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       font-weight: 600;
     }
 
@@ -55,27 +57,29 @@
       border-radius: 4px;
       overflow: hidden;
       border: 2px solid #312e2b;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       line-height: 0;
     }
 
     video {
       width: 100%;
       height: auto;
+      max-height: 220px;
+      object-fit: cover;
       transform: scaleX(-1); /* Mirror effect for better UX */
     }
 
     .login-btn {
       width: 100%;
-      padding: 14px;
+      padding: 13px;
       border: none;
       border-radius: 4px;
       background: #81b64c; /* Chess.com primary green */
       color: #1a2e0a;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, transform 0.1s;
       box-shadow: 0 4px 0 #5b8136; /* Subtle button depth */
     }
 
@@ -88,8 +92,64 @@
       box-shadow: 0 2px 0 #5b8136;
     }
 
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 22px 0 16px;
+      color: #7b7875;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+    .divider::before, .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #3d3b39;
+    }
+    .divider span {
+      padding: 0 10px;
+    }
+
+    .roll-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .roll-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 4px;
+      border: 1px solid #3d3b39;
+      background: #262522;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .roll-input:focus {
+      border-color: #81b64c;
+    }
+    .roll-input::placeholder {
+      color: #666461;
+    }
+
+    .roll-btn {
+      background: #3d3b39;
+      color: #fff;
+      box-shadow: 0 4px 0 #282624;
+      margin-top: 2px;
+    }
+    .roll-btn:hover {
+      background: #4a4845;
+    }
+    .roll-btn:active {
+      box-shadow: 0 2px 0 #282624;
+    }
+
     .status {
-      margin-top: 20px;
+      margin-top: 18px;
       font-size: 13px;
       font-weight: 500;
       min-height: 20px;
@@ -116,22 +176,30 @@
       100% { top: 100%; }
     }
   </style>
-    <link rel="icon" type="image/png" href="/favicon.ico">
+  <link rel="icon" type="image/png" href="/favicon.ico">
 </head>
 <body>
   <div class="logo">tictactoe<span>.</span>com</div>
 
   <div class="container">
-    <h2>Identity Verification</h2>
+    <h2>Player Login</h2>
     
     <div class="video-wrapper">
       <video id="video" autoplay muted playsinline></video>
       <div id="scanner" class="scanner-line"></div>
     </div>
 
-    <button class="login-btn" id="loginBtn" onclick="capture()">VERIFY IDENTITY</button>
+    <button class="login-btn" id="loginBtn" onclick="capture()">VERIFY BY CAMERA</button>
     
-    <div class="status" id="status">Position your face in the frame</div>
+    <div class="divider"><span>OR ENTER WITH ROLL NUMBER</span></div>
+
+    <div class="roll-form">
+      <input type="text" id="rollInput" class="roll-input" placeholder="Roll Number / UID (e.g. 2025101001)" autocomplete="off">
+      <input type="text" id="nameInput" class="roll-input" placeholder="Display Name (optional)" autocomplete="off">
+      <button class="login-btn roll-btn" id="rollBtn" onclick="loginWithRoll()">ENTER LOBBY</button>
+    </div>
+
+    <div class="status" id="status">Position face in frame or enter roll number</div>
   </div>
 
 <script>
@@ -146,12 +214,10 @@
         video.srcObject = stream;
     })
     .catch(err => {
-        statusText.innerText = "❌ Camera access denied";
-        statusText.classList.add("error");
+        statusText.innerText = "Camera not detected. You can enter your Roll Number to log in!";
     });
 
   function capture() {
-    // UI Updates
     statusText.innerText = "Analyzing facial features...";
     statusText.classList.remove("error", "success");
     scanner.style.display = "block";
@@ -159,8 +225,8 @@
     loginBtn.style.opacity = "0.7";
 
     const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
 
     const ctx = canvas.getContext("2d");
     ctx.drawImage(video, 0, 0);
@@ -169,7 +235,6 @@
       const formData = new FormData();
       formData.append("file", blob, "capture.png");
 
-      // Use the auth route we built in router.py
       fetch("/auth/login", {
         method: "POST",
         body: formData
@@ -183,20 +248,70 @@
         statusText.innerText = `✅ Identity Confirmed! Welcome, ${data.uid}`;
         statusText.classList.add("success");
           
-        // Redirect to lobby with the UID
         setTimeout(() => {
             window.location.href = `/lobby?uid=${data.uid}`;
-        }, 1200);
+        }, 1000);
       })
       .catch(err => {
         scanner.style.display = "none";
         loginBtn.disabled = false;
         loginBtn.style.opacity = "1";
-        statusText.innerText = "❌ Face not recognized. Try again.";
+        statusText.innerText = "❌ Face not recognized. Use Roll Number below to log in!";
         statusText.classList.add("error");
       });
     }, "image/png");
   }
+
+  function loginWithRoll() {
+    const roll = document.getElementById("rollInput").value.trim();
+    const name = document.getElementById("nameInput").value.trim();
+
+    if (!roll) {
+      statusText.innerText = "❌ Please enter a roll number";
+      statusText.classList.add("error");
+      statusText.classList.remove("success");
+      return;
+    }
+
+    if (!/^\d+$/.test(roll)) {
+      statusText.innerText = "❌ Roll number must contain numbers only";
+      statusText.classList.add("error");
+      statusText.classList.remove("success");
+      return;
+    }
+
+    statusText.innerText = "Entering arena...";
+    statusText.classList.remove("error", "success");
+
+    fetch("/auth/login-roll", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ roll_number: roll, name: name || undefined })
+    })
+    .then(async res => {
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Login failed");
+      return data;
+    })
+    .then(data => {
+      statusText.innerText = `✅ Welcome, ${data.name || data.uid}! Joining lobby...`;
+      statusText.classList.add("success");
+      setTimeout(() => {
+        window.location.href = `/lobby?uid=${data.uid}`;
+      }, 700);
+    })
+    .catch(err => {
+      statusText.innerText = `❌ ${err.message}`;
+      statusText.classList.add("error");
+    });
+  }
+
+  document.getElementById("rollInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") loginWithRoll();
+  });
+  document.getElementById("nameInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") loginWithRoll();
+  });
 </script>
 
 </body>
